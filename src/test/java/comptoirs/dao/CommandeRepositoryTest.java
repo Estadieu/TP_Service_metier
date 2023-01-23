@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+import comptoirs.service.CommandeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -19,6 +20,8 @@ import comptoirs.entity.Commande;
 import comptoirs.entity.Ligne;
 import comptoirs.entity.Produit;
 import lombok.extern.log4j.Log4j2;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @Log4j2 // Génère le 'logger' pour afficher les messages de trace
 @DataJpaTest

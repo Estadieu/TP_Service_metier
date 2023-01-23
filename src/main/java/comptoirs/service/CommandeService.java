@@ -1,9 +1,13 @@
 package comptoirs.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
+import com.sun.jdi.connect.IllegalConnectorArgumentsException;
+import comptoirs.entity.Ligne;
+import comptoirs.entity.Produit;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-
 import comptoirs.dao.ClientRepository;
 import comptoirs.dao.CommandeRepository;
 import comptoirs.entity.Commande;
@@ -62,7 +66,27 @@ public class CommandeService {
      * @return la commande mise à jour
      */
     @Transactional
-    public Commande enregistreExpédition(Integer commandeNum) {
-        //test
+    public Commande enregistreExpedition(Integer commandeNum) {
+        // commande existe? 
+        var commande = commandeDao.findById(commandeNum).orElseThrow();
+        // On vérifie si la commande n'est pas encore envoyée
+        var envoie = commande.getEnvoyeele();
+        // Si elle est pas evenyée, date envoi = date jour
+        if(envoie == null){
+            commande.setEnvoyeele(LocalDate.now());
+        }else {
+            throw new DataIntegrityViolationException("Déja livré");
+        }
+        // On prend les lignes
+        var lignescom = commande.getLignes();
+        for(Ligne ligne : lignescom) {
+            // On récupère chaque produit
+            var produit = ligne.getProduit();
+            // On décréménte
+            produit.setUnitesEnStock(produit.getUnitesEnStock() - ligne.getQuantite());
+            // produitDao.save(produit);
+        }
+        //ajout de la commande
+        return commande;
     }
 }

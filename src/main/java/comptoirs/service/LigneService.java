@@ -3,6 +3,7 @@ package comptoirs.service;
 import comptoirs.dao.CommandeRepository;
 import comptoirs.dao.LigneRepository;
 import comptoirs.dao.ProduitRepository;
+import comptoirs.entity.Commande;
 import comptoirs.entity.Ligne;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Positive;
@@ -43,8 +44,30 @@ public class LigneService {
      *  @param quantite la quantité commandée (positive)
      *  @return la ligne de commande créée
      */
+
     @Transactional
     Ligne ajouterLigne(Integer commandeNum, Integer produitRef, @Positive int quantite) {
-        throw new UnsupportedOperationException("Cette méthode n'est pas implémentée");
+        //produit existe
+        var produit = produitDao.findById(produitRef).orElseThrow();
+        // Commande existe
+        var commande = commandeDao.findById(commandeNum).orElseThrow();
+        // On récupère le nombre de produit restant en stock
+        var enStock = produit.getUnitesEnStock();
+        // On crée une nouvelle ligne de commande
+        var ligne = new Ligne();
+        // Check commande n'est pas encore envoyé
+        // Check assez de produit en stock pour prendre en compte la commande
+        if( commande.getEnvoyeele() == null && quantite > 0 && enStock >= quantite ) {
+            ligne.setCommande(commande);
+            ligne.setProduit(produit);
+            ligne.setQuantite(quantite);
+            // Enregistre dans la bdd
+            ligneDao.save(ligne);
+            // Mettre à jour le nombre de produit commandé
+            produit.setUnitesCommandees(produit.getUnitesCommandees() + quantite);
+        }else {
+            throw new IllegalArgumentException("Aucune ligne ajoutée");
+        }
+        return ligne;
     }
 }
